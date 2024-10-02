@@ -92,6 +92,52 @@ class FilesController {
 		  return res.status(500).json({ error: 'Internal Server Error' });
 	  }
   }
+
+  static async putPublish (req, res) {
+	  const { id } = req.params;
+
+	  try {
+		  const userId = req.user?.id;
+		  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+		  const file = await dbClient.collection('files').findOne({ _id: new ObjectId(id), userId });
+		  if (!file) return res.status(404).json({ error: 'Not found' });
+
+		  await dbClient.collection('files').updateOne(
+			  { _id: new ObjectId(id), userId },
+			  { $set: { isPublic: true } }
+		  );
+
+		  const updatedFile = await dbClient.collection('files').findOne({ _id: new ObjectId(id), userId });
+		  return res.status(200).json(updatedFile);
+	  } catch (error) {
+		  console.error(error);
+		  return res.status(500).json({ error: 'Internal Server Error' });
+	  }
+  }
+
+  static async putUnpublish (req, res) {
+	  const { id } = req.params;
+
+	  try {
+		  const userId = req.user?.id;
+		  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+		  const file = await dbClient.collection('files').findOne({ _id: new ObjectId(id), userId });
+		  if (!file) return res.status(404).json({ error: 'Not found' });
+
+		  await dbClient.collection('files').updateOne(
+			  { _id: new ObjectId(id), userId },
+			  { $set: { isPublic: false } }
+		  );
+
+		  const updatedFile = await dbClient.collection('files').findOne({ _id: new ObjectId(id), userId });
+		  return res.status(200).json(updatedFile);
+	  } catch (error) {
+		  console.error(error);
+		  return res.status(500).json({ error: 'Internal Server Error' });
+	  }
+  }
 }
 
 export default FilesController;
