@@ -25,11 +25,12 @@ class RedisClient {
   }
 
   async waitForReady () {
-    if (this.isRead) return;
+    if (this.isReady) return;
     await new Promise((resolve) => this.client.once('ready', resolve));
   }
 
   async get (key) {
+    await this.waitForReady();
     try {
       const value = await this.getAsync(key);
       return value;
@@ -40,6 +41,7 @@ class RedisClient {
   }
 
   async set (key, value, duration) {
+    await this.waitForReady();
     try {
       await this.setAsync(key, value, 'EX', duration);
     } catch (err) {
@@ -48,6 +50,7 @@ class RedisClient {
   }
 
   async del (key) {
+    await this.waitForReady();
     try {
       await this.delAsync(key);
     } catch (err) {
