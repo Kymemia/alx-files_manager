@@ -1,4 +1,5 @@
-const { MongoClient } = require('mongodb');
+import pkg from 'mongodb';
+const { MongoClient } = pkg;
 
 const DB_HOST = process.env.DB_Host || 'localhost';
 const DB_PORT = process.env.DB_PORT || 27017;
