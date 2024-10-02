@@ -56,6 +56,42 @@ class FilesController {
       return res.status(500).json({ error: 'Internal Server Error' });
     }
   }
+
+  static async getShow (req, res) {
+    const { id } = req.params;
+
+    try {
+      const userId = req.user.id;
+      if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+      const file = await dbClient.collection('files').findOne({ _id: id, userId });
+      if (!file) return res.status(404).json({ error: 'Not found' });
+
+      return res.status(200).json(file);
+    } catch (error) {
+	    console.error(error);
+	    return res.status(500).json({ error: 'Internal Server Error' });
+    }
+  }
+
+  static async getIndex (req, res) {
+	  const { parentId = 0, page = 0 } = req.query;
+
+	  try {
+		  const userId = req.user.id;
+		  if (!userId) return res.status(401).json({ error: 'Unauthorized' });
+
+		  const limit = 20;
+		  const skip = page * limit;
+
+		  const files = await dbClient.connection('files').find({ parentId, userId }).skip(skip).limit(limit).toArray();
+
+		  return res.status(200).json(files);
+	  } catch (error) {
+		  console.error(error);
+		  return res.status(500).json({ error: 'Internal Server Error' });
+	  }
+  }
 }
 
 export default FilesController;
