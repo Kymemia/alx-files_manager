@@ -31,6 +31,11 @@ class DBClient {
   async ensureConnection () {
     await this.connectionPromise;
   }
+  
+  async collection(name) {
+    await this.ensureConnection();
+    return this.db.collection(name);
+  }
 
   async nbUsers () {
     try {
