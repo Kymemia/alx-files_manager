@@ -138,6 +138,36 @@ class FilesController {
 		  return res.status(500).json({ error: 'Internal Server Error' });
 	  }
   }
+
+  static async getFile(req, res) {
+    const { id } = req.params;
+    try {
+    const file = await dbClient.collection('files').findOne({ _id: id });
+    if (!file) return res.status(404).json({ error: 'Not found' });
+
+    if (!req.user || (file.userId && file.userId !== req.user.id) || !file.isPublic) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    if (file.type === 'folder') {
+      return res.status(400).json({ error: 'A folder doesn\'t have content' });
+    }
+
+    const localPath = file.localPath;
+    if (!fs.existsSync(localPath)) {
+      return res.status(404).json({ error: 'Not found' });
+    }
+
+    const mime = require('mime-types');
+    const mimeType = mime.lookup(file.name);
+    const fileData = fs.readFileSync(localPath);
+
+    res.setHeader('Content-Type', mimeType);
+    res.send(fileData);
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ error: 'Internal Server Error' });
+  } 
 }
 
 export default FilesController;
